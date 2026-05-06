@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Alphabet Family Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Fredoka:wght@400;500;600;700&family=Noto+Sans+Phoenician&family=Noto+Serif+Hebrew:wght@500;700&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:        #F4ECD8;
+    --paper-deep:   #E8DDC0;
+    --ink:          #2A2438;
+    --ink-soft:     #5A4F65;
+    --rule:         #C9B98E;
+
+    --aleph:  #C75D3F;
+    --bet:    #D89834;
+    --mem:    #4A6FA5;
+    --ayin:   #6F8147;
+    --resh:   #BC6B7A;
+    --nun:    #3A7E7C;
+    --lamed:  #6B7F3A;
+    --tav:    #8C3B3B;
+
+    --shadow-card: 0 2px 0 rgba(74,55,32,.08), 0 8px 22px rgba(74,55,32,.18);
+    --shadow-lift: 0 4px 0 rgba(74,55,32,.10), 0 18px 40px rgba(74,55,32,.28);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
+  body {
+    font-family: 'Fredoka', system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    background-image:
+      radial-gradient(1200px 600px at 80% -5%, rgba(216,152,52,.18), transparent 55%),
+      radial-gradient(900px 500px at -10% 110%, rgba(74,111,165,.14), transparent 60%),
+      radial-gradient(circle at 12% 18%, rgba(0,0,0,.04) 1px, transparent 1.5px),
+      radial-gradient(circle at 73% 42%, rgba(0,0,0,.03) 1px, transparent 1.5px),
+      radial-gradient(circle at 88% 79%, rgba(0,0,0,.04) 1px, transparent 1.5px),
+      radial-gradient(circle at 28% 88%, rgba(0,0,0,.03) 1px, transparent 1.5px);
+    background-size: auto, auto, 240px 240px, 180px 180px, 320px 320px, 200px 200px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Subtle paper grain */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      repeating-linear-gradient(135deg, rgba(74,55,32,.025) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(45deg, rgba(74,55,32,.018) 0 1px, transparent 1px 6px);
+    mix-blend-mode: multiply;
+  }
+
+  header.title {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 32px 20px 18px;
+  }
+  .eyebrow {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(34px, 9vw, 52px);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    color: var(--ink);
+  }
+  h1 .amp {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--aleph);
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 360px;
+    margin: 0 auto;
+    line-height: 1.45;
+  }
+
+  .ornament {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin: 18px auto 8px;
+    color: var(--rule);
+  }
+  .ornament .line { height: 1px; width: 60px; background: currentColor; }
+  .ornament .dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+
+  /* GRID */
+  main {
+    position: relative; z-index: 1;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 12px 16px 60px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  @media (min-width: 600px) {
+    .grid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  }
+
+  .card {
+    position: relative;
+    border-radius: 22px;
+    padding: 22px 14px 18px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--card);
+    color: #FFF8EC;
+    border: 2px solid rgba(0,0,0,.10);
+    box-shadow: var(--shadow-card);
+    transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 25% 18%, rgba(255,255,255,.20), transparent 45%),
+      radial-gradient(circle at 80% 92%, rgba(0,0,0,.18), transparent 55%);
+    pointer-events: none; z-index: 0;
+  }
+  .card:active { transform: translateY(2px) scale(.98); box-shadow: var(--shadow-card); }
+  @media (hover: hover) {
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+  }
+
+  .card .glyph {
+    font-family: 'Noto Sans Phoenician', 'Fraunces', serif;
+    font-size: 56px; line-height: 1;
+    margin: 4px 0 10px;
+    text-shadow: 0 2px 0 rgba(0,0,0,.18);
+    position: relative; z-index: 1;
+  }
+  .card .nm {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: .02em;
+    position: relative; z-index: 1;
+  }
+  .card .meaning {
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    opacity: .82;
+    margin-top: 2px;
+    position: relative; z-index: 1;
+  }
+  .card .corner {
+    position: absolute; top: 8px; left: 12px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 12px;
+    opacity: .55;
+    z-index: 1;
+  }
+
+  /* DETAIL VIEW */
+  .detail {
+    position: fixed; inset: 0;
+    background: var(--paper);
+    z-index: 100;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+  }
+  .detail.open { opacity: 1; pointer-events: auto; }
+  .detail::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none;
+    background-image:
+      repeating-linear-gradient(135deg, rgba(74,55,32,.025) 0 1px, transparent 1px 4px);
+    mix-blend-mode: multiply;
+  }
+  .detail-bar {
+    position: sticky; top: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--paper);
+    background-image: linear-gradient(180deg, var(--paper) 70%, rgba(244,236,216,0));
+    z-index: 2;
+    border-bottom: 1px solid var(--rule);
+  }
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px 6px 0;
+  }
+  .back svg { width: 18px; height: 18px; }
+  .crumb {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .crumb em {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-transform: lowercase;
+    letter-spacing: 0;
+    margin-left: 6px;
+  }
+
+  .detail-body {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 22px 20px 80px;
+    position: relative; z-index: 1;
+  }
+
+  /* Pictogram stage */
+  .stage {
+    text-align: center;
+    padding: 18px 0 10px;
+    opacity: 0; transform: translateY(8px);
+  }
+  .detail.open .stage {
+    animation: rise .55s .05s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .pict {
+    width: clamp(140px, 38vw, 180px);
+    height: clamp(140px, 38vw, 180px);
+    margin: 0 auto;
+    display: block;
+    filter: drop-shadow(0 6px 0 rgba(74,55,32,.08)) drop-shadow(0 14px 24px rgba(74,55,32,.16));
+  }
+  .pict path, .pict line, .pict polygon, .pict ellipse, .pict circle {
+    transform-origin: center;
+  }
+
+  .stage-caption {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-size: 14px;
+    margin-top: 6px;
+  }
+  .stage-caption b {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* Evolution timeline */
+  .evo {
+    margin: 28px 0 14px;
+    opacity: 0;
+  }
+  .detail.open .evo { animation: fadeIn .5s .35s ease forwards; }
+
+  .evo-label {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+
+  .evo-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    align-items: stretch;
+  }
+  @media (max-width: 520px) {
+    .evo-row { gap: 6px; }
+  }
+
+  .evo-cell {
+    border-radius: 14px;
+    background: #FFF8EC;
+    border: 1.5px solid var(--rule);
+    padding: 14px 6px 10px;
+    text-align: center;
+    position: relative;
+    opacity: 0;
+    transform: translateY(10px) scale(.94);
+  }
+  .evo-cell.is-first {
+    background: var(--accent);
+    color: #FFF8EC;
+    border-color: rgba(0,0,0,.08);
+  }
+  .detail.open .evo-cell {
+    animation: pop .45s cubic-bezier(.2,.9,.3,1.4) forwards;
+  }
+  .detail.open .evo-cell:nth-child(1) { animation-delay: 0.55s; }
+  .detail.open .evo-cell:nth-child(2) { animation-delay: 0.68s; }
+  .detail.open .evo-cell:nth-child(3) { animation-delay: 0.81s; }
+  .detail.open .evo-cell:nth-child(4) { animation-delay: 0.94s; }
+  .detail.open .evo-cell:nth-child(5) { animation-delay: 1.07s; }
+  .detail.open .evo-cell:nth-child(6) { animation-delay: 1.20s; }
+
+  .evo-cell .ch {
+    font-size: 32px;
+    line-height: 1.1;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .evo-cell.is-first .ch {
+    color: #FFF8EC;
+    font-family: 'Noto Sans Phoenician', 'Fraunces', serif;
+  }
+  .evo-cell .scr {
+    font-size: 9.5px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+  .evo-cell.is-first .scr { color: rgba(255,248,236,.85); }
+  .evo-cell .cn {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .evo-cell.is-first .cn { color: rgba(255,248,236,.78); }
+
+  /* Specific script font hints */
+  .evo-cell[data-script="hebrew"] .ch { font-family: 'Noto Serif Hebrew', 'Fraunces', serif; }
+  .evo-cell[data-script="arabic"] .ch { font-family: 'Noto Naskh Arabic', 'Fraunces', serif; }
+
+  /* Story card */
+  .story {
+    margin-top: 26px;
+    padding: 22px 22px 20px;
+    background: #FFF8EC;
+    border: 1.5px solid var(--rule);
+    border-radius: 18px;
+    position: relative;
+    opacity: 0;
+  }
+  .detail.open .story { animation: fadeIn .55s 1.35s ease forwards; }
+
+  .story::before, .story::after {
+    content: '';
+    position: absolute;
+    width: 22px; height: 22px;
+    border: 1.5px solid var(--rule);
+    border-radius: 4px;
+  }
+  .story::before { top: -8px; left: -8px; border-right: none; border-bottom: none; }
+  .story::after  { bottom: -8px; right: -8px; border-left: none; border-top: none; }
+
+  .story h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 18px;
+    margin: 0 0 8px;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+  }
+  .story p {
+    font-size: 15.5px;
+    line-height: 1.55;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  .story p:last-child { margin-bottom: 0; }
+  .story em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+  .story .didyou {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--paper-deep);
+    border-radius: 10px;
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+  .story .didyou b {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    font-size: 11px;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* Footer hint inside detail */
+  .nav-row {
+    display: flex; justify-content: space-between; gap: 10px;
+    margin-top: 22px;
+    opacity: 0;
+  }
+  .detail.open .nav-row { animation: fadeIn .5s 1.55s ease forwards; }
+  .nav-btn {
+    flex: 1;
+    background: transparent;
+    border: 1.5px solid var(--rule);
+    border-radius: 14px;
+    padding: 12px 10px;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+    transition: background .2s;
+  }
+  .nav-btn:active { background: var(--paper-deep); }
+  .nav-btn .lbl {
+    display: block;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .nav-btn .nx {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .nav-btn.next { text-align: right; }
+
+  /* Footer of grid view */
+  .footer {
+    text-align: center;
+    margin-top: 36px;
+    color: var(--ink-soft);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: .04em;
+    line-height: 1.5;
+    padding: 0 20px;
+  }
+  .footer .ornament { margin-bottom: 12px; }
+
+  /* Animations */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(10px) scale(.94); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes draw {
+    from { stroke-dashoffset: var(--len, 600); }
+    to   { stroke-dashoffset: 0; }
+  }
+  .pict [data-draw] {
+    stroke-dasharray: var(--len, 600);
+    stroke-dashoffset: var(--len, 600);
+    animation: draw 1.2s .15s cubic-bezier(.4,0,.2,1) forwards;
+  }
+</style>
+</head>
+<body>
+
+<header class="title">
+  <div class="eyebrow">Tap a letter, meet its family</div>
+  <h1>Alphabet <span class="amp">&amp;</span> Family Tree</h1>
+  <p class="subtitle">Most letters you write today were sketched 3,000 years ago — as oxen, houses, water, and eyes.</p>
+  <div class="ornament" aria-hidden="true">
+    <span class="line"></span><span class="dot"></span><span class="line"></span>
+  </div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+
+  <div class="footer">
+    <div class="ornament" aria-hidden="true">
+      <span class="line"></span><span class="dot"></span><span class="line"></span>
+    </div>
+    Eight ancestors. Five living scripts.<br/>
+    Greek · Latin · Cyrillic · Hebrew · Arabic
+  </div>
+</main>
+
+<div class="detail" id="detail" aria-hidden="true">
+  <div class="detail-bar">
+    <button class="back" id="backBtn" aria-label="Back to grid">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <span>back</span>
+    </button>
+    <div class="crumb" id="crumb"></div>
+    <div style="width:54px"></div>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
+
+<script>
+/* ------------------------------------------------------------
+   DATA: 8 Phoenician ancestors and their living descendants.
+   ------------------------------------------------------------ */
+const LETTERS = [
+  {
+    id: 'aleph',
+    phoenician: '𐤀',
+    name: 'Aleph',
+    meaning: 'Ox',
+    accent: 'var(--aleph)',
+    pict: `
+      <svg class="pict" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <path data-draw style="--len:200" d="M 78 78 Q 55 38, 28 24" fill="none" stroke="#C75D3F" stroke-width="7" stroke-linecap="round"/>
+        <path data-draw style="--len:200" d="M 122 78 Q 145 38, 172 24" fill="none" stroke="#C75D3F" stroke-width="7" stroke-linecap="round"/>
+        <path data-draw style="--len:520" d="M 60 80 Q 56 130, 100 168 Q 144 130, 140 80 Q 130 65, 100 65 Q 70 65, 60 80 Z" fill="#E8B89C" stroke="#8C3B1F" stroke-width="3.5" stroke-linejoin="round"/>
+        <circle cx="84" cy="105" r="5.5" fill="#2A2438"/>
+        <circle cx="116" cy="105" r="5.5" fill="#2A2438"/>
+        <ellipse cx="100" cy="138" rx="9" ry="7" fill="#8C3B1F"/>
+        <path d="M 88 150 Q 100 158, 112 150" fill="none" stroke="#8C3B1F" stroke-width="3" stroke-linecap="round"/>
+      </svg>`,
+    descendants: [
+      { script: 'phoenician', char: '𐤀', name: 'Aleph' },
+      { script: 'greek',  char: 'Α', name: 'Alpha' },
+      { script: 'latin',  char: 'A', name: 'A' },
+      { script: 'cyrillic', char: 'А', name: 'A' },
+      { script: 'hebrew', char: 'א', name: 'Alef' },
+      { script: 'arabic', char: 'ا', name: 'Alif' },
+    ],
+    story: `The very first letter of the very first alphabet was an <em>ox</em>. The Phoenicians sketched its head with two horns pointing up — that's 𐤀. The Greeks borrowed the shape but turned it sideways. The Romans flipped it upside down.`,
+    didyou: `Turn the letter <b>A</b> upside down. See the V at the top? Those are the ox's horns, still there 3,000 years later.`,
+  },
+  {
+    id: 'bet',
+    phoenician: '𐤁',
+    name: 'Bet',
+    meaning: 'House',
+    accent: 'var(--bet)',
+    pict: `
+      <svg class="pict" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <polygon data-draw style="--len:600" points="34,98 100,42 166,98" fill="#F4DDB0" stroke="#8B5A1F" stroke-width="3.5" stroke-linejoin="round"/>
+        <rect data-draw style="--len:520" x="48" y="98" width="104" height="74" fill="#F4DDB0" stroke="#8B5A1F" stroke-width="3.5"/>
+        <rect x="86" y="128" width="28" height="44" fill="#8B5A1F" rx="2"/>
+        <circle cx="108" cy="152" r="2" fill="#D89834"/>
+        <rect x="58" y="112" width="20" height="20" fill="#A8D8F0" stroke="#8B5A1F" stroke-width="2"/>
+        <rect x="122" y="112" width="20" height="20" fill="#A8D8F0" stroke="#8B5A1F" stroke-width="2"/>
+        <line x1="68" y1="112" x2="68" y2="132" stroke="#8B5A1F" stroke-width="1.5"/>
+        <line x1="58" y1="122" x2="78" y2="122" stroke="#8B5A1F" stroke-width="1.5"/>
+        <line x1="132" y1="112" x2="132" y2="132" stroke="#8B5A1F" stroke-width="1.5"/>
+        <line x1="122" y1="122" x2="142" y2="122" stroke="#8B5A1F" stroke-width="1.5"/>
+      </svg>`,
+    descendants: [
+      { script: 'phoenician', char: '𐤁', name: 'Bet' },
+      { script: 'greek',  char: 'Β', name: 'Beta' },
+      { script: 'latin',  char: 'B', name: 'B' },
+      { script: 'cyrillic', char: 'Б', name: 'Be' },
+      { script: 'hebrew', char: 'ב', name: 'Bet' },
+      { script: 'arabic', char: 'ب', name: 'Bāʾ' },
+    ],
+    story: `Bet means <em>house</em> — and 𐤁 looks like a tiny floor plan: walls and a doorway. The word <em>alphabet</em> itself comes from <em>aleph</em> + <em>bet</em>: "ox-house."`,
+    didyou: `Hebrew uses the same word, <b>bayit</b>, for "house" today — and the letter <b>ב</b> still sits at the start of it.`,
+  },
+  {
+    id: 'mem',
+    phoenician: '𐤌',
+    name: 'Mem',
+    meaning: 'Water',
+    accent: 'var(--mem)',
+    pict: `
+      <svg class="pict" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <path data-draw style="--len:400" d="M 18 70 Q 45 50, 70 70 T 122 70 T 184 70" fill="none" stroke="#4A6FA5" stroke-width="9" stroke-linecap="round"/>
+        <path data-draw style="--len:400" d="M 18 110 Q 45 90, 70 110 T 122 110 T 184 110" fill="none" stroke="#5A87C8" stroke-width="9" stroke-linecap="round"/>
+        <path data-draw style="--len:400" d="M 18 150 Q 45 130, 70 150 T 122 150 T 184 150" fill="none" stroke="#7FA9D8" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="50" cy="58" r="3" fill="#4A6FA5"/>
+        <circle cx="140" cy="98" r="3" fill="#5A87C8"/>
+      </svg>`,
+    descendants: [
+      { script: 'phoenician', char: '𐤌', name: 'Mem' },
+      { script: 'greek',  char: 'Μ', name: 'Mu' },
+      { script: 'latin',  char: 'M', name: 'M' },
+      { script: 'cyrillic', char: 'М', name: 'Em' },
+      { script: 'hebrew', char: 'מ', name: 'Mem' },
+      { script: 'arabic', char: 'م', name: 'Mīm' },
+    ],
+    story: `Mem was a string of <em>waves</em> — water was so essential the Phoenicians gave it its own letter. You can still hear it: in Hebrew, "water" is <em>mayim</em>, in Arabic <em>mā'</em>, in Latin <em>mare</em>, in Spanish <em>mar</em>.`,
+    didyou: `Look at a capital <b>M</b> sideways. You'll see two of those waves.`,
+  },
+  {
+    id: 'ayin',
+    phoenician: '𐤏',
+    name: 'Ayin',
+    meaning: 'Eye',
+    accent: 'var(--ayin)',
+    pict: `
+      <svg class="pict" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <path data-draw style="--len:520" d="M 18 100 Q 100 32, 182 100 Q 100 168, 18 100 Z" fill="#FFF8EC" stroke="#4F5C2E" stroke-width="4" stroke-linejoin="round"/>
+        <circle data-draw style="--len:240" cx="100" cy="100" r="36" fill="#6F8147" stroke="#4F5C2E" stroke-width="3"/>
+        <circle cx="100" cy="100" r="16" fill="#2A2438"/>
+        <circle cx="92" cy="92" r="6" fill="#FFF8EC"/>
+        <path d="M 28 96 Q 36 102, 30 110" fill="none" stroke="#4F5C2E" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 172 96 Q 164 102, 170 110" fill="none" stroke="#4F5C2E" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>`,
+    descendants: [
+      { script: 'phoenician', char: '𐤏', name: 'Ayin' },
+      { script: 'greek',  char: 'Ο', name: 'Omicron' },
+      { script: 'latin',  char: 'O', name: 'O' },
+      { script: 'cyrillic', char: 'О', name: 'O' },
+      { script: 'hebrew', char: 'ע', name: 'Ayin' },
+      { script: 'arabic', char: 'ع', name: 'ʿAyn' },
+    ],
+    story: `Ayin was a drawing of an <em>eye</em>, and the Phoenicians wrote it as a perfect circle for the iris. The Greeks took the circle but used it for the vowel "o" — which is why the letter <strong>O</strong> is round to this day.`,
+    didyou: `In Arabic and Hebrew, "<b>ayin</b>" still means "eye" — and "<b>ayn</b>" is also the word for a water spring. Eyes that pour.`,
+  },
+  {
+    id: 'resh',
+    phoenician: '𐤓',
+    name: 'Resh',
+    meaning: 'Head',
+    accent: 'var(--resh)',
+    pict: `
+      <svg class="pict" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <path data-draw style="--len:600" d="M 70 48 Q 130 38, 148 78 Q 158 130, 132 162 Q 100 168, 78 158 Q 58 144, 60 108 Q 52 72, 70 48 Z" fill="#E8B89C" stroke="#8C3B5C" stroke-width="3.5" stroke-linejoin="round"/>
+        <circle cx="118" cy="92" r="4.5" fill="#2A2438"/>
+        <path d="M 110 124 Q 122 130, 132 124" fill="none" stroke="#8C3B5C" stroke-width="3" stroke-linecap="round"/>
+        <path data-draw style="--len:200" d="M 72 50 Q 100 28, 132 44" fill="none" stroke="#8C3B5C" stroke-width="7" stroke-linecap="round"/>
+        <path data-draw style="--len:120" d="M 80 36 Q 92 22, 108 30" fill="none" stroke="#8C3B5C" stroke-width="5" stroke-linecap="round"/>
+        <path d="M 145 88 Q 152 92, 148 100" fill="none" stroke="#8C3B5C" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>`,
+    descendants: [
+      { script: 'phoenician', char: '𐤓', name: 'Resh' },
+      { script: 'greek',  char: 'Ρ', name: 'Rho' },
+      { script: 'latin',  char: 'R', name: 'R' },
+      { script: 'cyrillic', char: 'Р', name: 'Er' },
+      { script: 'hebrew', char: 'ר', name: 'Resh' },
+      { script: 'arabic', char: 'ر', name: 'Rāʾ' },
+    ],
+    story: `Resh means <em>head</em> — the Phoenicians drew it as a profile, looking left, with a little tuft on top. The Greeks kept the round head and gave it a leg, making <strong>Ρ</strong>. The Romans added a kick to the leg, and that became <strong>R</strong>.`,
+    didyou: `Watch out: Greek <b>Ρ</b> looks just like Latin <b>P</b>, but it sounds like <b>R</b>. Same shape, different family job.`,
+  },
+  {
+    id: 'nun',
+    phoenician: '𐤍',
+    name: 'Nun',
+    meaning: 'Snake',
+    accent: 'var(--nun)',
+    pict: `
+      <svg class="pict" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <path data-draw style="--len:680" d="M 28 168 Q 56 138, 78 154 Q 102 174, 122 134 Q 142 92, 128 62 Q 112 38, 144 28" fill="none" stroke="#3A7E7C" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <ellipse cx="148" cy="26" rx="15" ry="11" fill="#3A7E7C"/>
+        <circle cx="152" cy="22" r="2.2" fill="#FFF8EC"/>
+        <path d="M 162 28 L 174 32 L 167 36 L 174 40" fill="none" stroke="#FF5C5C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="58" cy="146" r="2" fill="#5DA09E"/>
+        <circle cx="98" cy="160" r="2" fill="#5DA09E"/>
+      </svg>`,
+    descendants: [
+      { script: 'phoenician', char: '𐤍', name: 'Nun' },
+      { script: 'greek',  char: 'Ν', name: 'Nu' },
+      { script: 'latin',  char: 'N', name: 'N' },
+      { script: 'cyrillic', char: 'Н', name: 'En' },
+      { script: 'hebrew', char: 'נ', name: 'Nun' },
+      { script: 'arabic', char: 'ن', name: 'Nūn' },
+    ],
+    story: `Nun was a <em>snake</em> — or, some scholars think, a fish. Its zig-zag body became 𐤍, which the Greeks straightened into <strong>Ν</strong>. The Romans kept it.`,
+    didyou: `Cyrillic <b>Н</b> looks exactly like Latin <b>H</b> — but it makes the <b>N</b> sound. Same letter, different costume.`,
+  },
+  {
+    id: 'lamed',
+    phoenician: '𐤋',
+    name: 'Lamed',
+    meaning: 'Goad',
+    accent: 'var(--lamed)',
+    pict: `
+      <svg class="pict" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <path data-draw style="--len:480" d="M 88 178 L 88 70 Q 88 38, 122 38 Q 148 42, 142 66" fill="none" stroke="#6B7F3A" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="88" cy="178" r="6" fill="#4F5C2E"/>
+        <path d="M 142 66 L 152 78" fill="none" stroke="#6B7F3A" stroke-width="6" stroke-linecap="round"/>
+      </svg>`,
+    descendants: [
+      { script: 'phoenician', char: '𐤋', name: 'Lamed' },
+      { script: 'greek',  char: 'Λ', name: 'Lambda' },
+      { script: 'latin',  char: 'L', name: 'L' },
+      { script: 'cyrillic', char: 'Л', name: 'El' },
+      { script: 'hebrew', char: 'ל', name: 'Lamed' },
+      { script: 'arabic', char: 'ل', name: 'Lām' },
+    ],
+    story: `Lamed was a <em>shepherd's goad</em> — a long stick with a hook for steering animals. The hook is still there in Hebrew <strong>ל</strong>, the tallest letter in the alphabet. The Greeks straightened it into <strong>Λ</strong>; the Romans rotated it into <strong>L</strong>.`,
+    didyou: `In Hebrew, the verb <b>lamad</b> — to learn — comes from this same root. To teach is to <em>nudge gently in the right direction</em>.`,
+  },
+  {
+    id: 'tav',
+    phoenician: '𐤕',
+    name: 'Tav',
+    meaning: 'Mark',
+    accent: 'var(--tav)',
+    pict: `
+      <svg class="pict" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <line data-draw style="--len:240" x1="44" y1="44" x2="156" y2="156" stroke="#8C3B3B" stroke-width="14" stroke-linecap="round"/>
+        <line data-draw style="--len:240" x1="156" y1="44" x2="44" y2="156" stroke="#8C3B3B" stroke-width="14" stroke-linecap="round"/>
+        <circle cx="100" cy="100" r="6" fill="#5C2828"/>
+      </svg>`,
+    descendants: [
+      { script: 'phoenician', char: '𐤕', name: 'Tav' },
+      { script: 'greek',  char: 'Τ', name: 'Tau' },
+      { script: 'latin',  char: 'T', name: 'T' },
+      { script: 'cyrillic', char: 'Т', name: 'Te' },
+      { script: 'hebrew', char: 'ת', name: 'Tav' },
+      { script: 'arabic', char: 'ت', name: 'Tāʾ' },
+    ],
+    story: `Tav simply means <em>mark</em> — the X you'd scratch into clay or wood to sign your name when you couldn't write. It's the last letter of the Phoenician and Hebrew alphabets, like a final stamp.`,
+    didyou: `When you can't sign a paper and just write an <b>X</b>, you're using the original 3,000-year-old letter — exactly as it was first drawn.`,
+  },
+];
+
+const SCRIPT_LABEL = {
+  phoenician: 'Phoenician',
+  greek: 'Greek',
+  latin: 'Latin',
+  cyrillic: 'Cyrillic',
+  hebrew: 'Hebrew',
+  arabic: 'Arabic',
+};
+
+/* ------------------------------------------------------------
+   RENDER GRID
+   ------------------------------------------------------------ */
+const grid = document.getElementById('grid');
+LETTERS.forEach((L, i) => {
+  const card = document.createElement('button');
+  card.className = 'card';
+  card.style.setProperty('--card', L.accent);
+  card.dataset.id = L.id;
+  card.innerHTML = `
+    <span class="corner">${String(i+1).padStart(2,'0')}</span>
+    <div class="glyph">${L.phoenician}</div>
+    <div class="nm">${L.name}</div>
+    <div class="meaning">${L.meaning}</div>
+  `;
+  card.addEventListener('click', () => openDetail(L.id));
+  grid.appendChild(card);
+});
+
+/* ------------------------------------------------------------
+   DETAIL VIEW
+   ------------------------------------------------------------ */
+const detail   = document.getElementById('detail');
+const detailBody = document.getElementById('detailBody');
+const crumb    = document.getElementById('crumb');
+const backBtn  = document.getElementById('backBtn');
+
+function openDetail(id) {
+  const L = LETTERS.find(x => x.id === id);
+  if (!L) return;
+  const idx = LETTERS.indexOf(L);
+  const prev = LETTERS[(idx - 1 + LETTERS.length) % LETTERS.length];
+  const next = LETTERS[(idx + 1) % LETTERS.length];
+
+  detail.style.setProperty('--accent', L.accent);
+  crumb.innerHTML = `${L.name} <em>${L.meaning.toLowerCase()}</em>`;
+
+  const cells = L.descendants.map((d, i) => `
+    <div class="evo-cell ${i === 0 ? 'is-first' : ''}" data-script="${d.script}">
+      <div class="ch">${d.char}</div>
+      <div class="scr">${SCRIPT_LABEL[d.script]}</div>
+      <div class="cn">${d.name}</div>
+    </div>
+  `).join('');
+
+  detailBody.innerHTML = `
+    <div class="stage">
+      ${L.pict}
+      <div class="stage-caption">A drawing of <b>${L.meaning.toLowerCase()}</b> — the original meaning of <b>${L.name}</b>.</div>
+    </div>
+
+    <div class="evo">
+      <div class="evo-label">— how it grew up —</div>
+      <div class="evo-row">${cells}</div>
+    </div>
+
+    <div class="story">
+      <h3>The story</h3>
+      <p>${L.story}</p>
+      <div class="didyou">
+        <b>did you know</b>
+        ${L.didyou}
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn prev" data-go="${prev.id}">
+        <span class="lbl">← previous</span>
+        <span class="nx">${prev.name}</span>
+      </button>
+      <button class="nav-btn next" data-go="${next.id}">
+        <span class="lbl">next →</span>
+        <span class="nx">${next.name}</span>
+      </button>
+    </div>
+  `;
+
+  // Wire up prev/next
+  detailBody.querySelectorAll('[data-go]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      detail.scrollTop = 0;
+      // brief reset to retrigger the entrance animations
+      detail.classList.remove('open');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        openDetail(btn.dataset.go);
+      }));
+    });
+  });
+
+  detail.classList.add('open');
+  detail.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  detail.classList.remove('open');
+  detail.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+backBtn.addEventListener('click', closeDetail);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && detail.classList.contains('open')) closeDetail();
+});
+</script>
+</body>
+</html>
